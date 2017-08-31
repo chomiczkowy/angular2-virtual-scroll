@@ -141,11 +141,19 @@ var VirtualScrollComponent = (function () {
         };
     };
     VirtualScrollComponent.prototype.calculateItems = function () {
+        var _this = this;
         var el = this.parentScroll instanceof Window ? document.body : this.parentScroll || this.element.nativeElement;
         var d = this.calculateDimensions();
         var items = this.items || [];
         var offsetTop = this.getElementsOffset();
-        this.scrollHeight = d.childHeight * d.itemCount / d.itemsPerRow;
+        var itemsHeightSum = d.childHeight * d.itemCount;
+        if (this.getItemSize) {
+            itemsHeightSum = 0;
+            items.forEach(function (item) {
+                itemsHeightSum += _this.getItemSize(item);
+            });
+        }
+        this.scrollHeight = itemsHeightSum / d.itemsPerRow;
         if (el.scrollTop > this.scrollHeight) {
             el.scrollTop = this.scrollHeight + offsetTop;
         }
@@ -215,6 +223,7 @@ var VirtualScrollComponent = (function () {
         'childWidth': [{ type: core_1.Input },],
         'childHeight': [{ type: core_1.Input },],
         'bufferAmount': [{ type: core_1.Input },],
+        'getItemSize': [{ type: core_1.Input },],
         'parentScroll': [{ type: core_1.Input },],
         'update': [{ type: core_1.Output },],
         'change': [{ type: core_1.Output },],
