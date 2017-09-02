@@ -129,6 +129,12 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
     ngOnInit() {
         this.scrollbarWidth = 0; // this.element.nativeElement.offsetWidth - this.element.nativeElement.clientWidth;
         this.scrollbarHeight = 0; // this.element.nativeElement.offsetHeight - this.element.nativeElement.clientHeight;
+
+        if (!this.getItemSize) {
+            this.getItemSize = (item) => {
+                return this.childHeight;
+            }
+        }
     }
 
     ngOnDestroy() {
@@ -224,7 +230,15 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
 
         let itemsPerRow = Math.max(1, this.countItemsPerRow());
         let itemsPerRowByCalc = Math.max(1, Math.floor(viewWidth / childWidth));
-        let itemsPerCol = Math.max(1, Math.floor(viewHeight / childHeight));
+        var childrenHeightSum = 0;
+        let itemsPerCol = 0;
+        for (itemsPerCol = 0; itemsPerCol < items.length; itemsPerCol++) {
+            childrenHeightSum += this.getItemSize(items[itemsPerCol]);
+            if (childrenHeightSum > viewHeight)
+                break;
+        }
+
+        itemsPerCol = Math.max(1, itemsPerCol);
         let scrollTop = Math.max(0, el.scrollTop);
         if (itemsPerCol === 1 && Math.floor(scrollTop / this.scrollHeight * itemCount) + itemsPerRowByCalc >= itemCount) {
             itemsPerRow = itemsPerRowByCalc;
@@ -242,26 +256,42 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
         };
     }
 
+    private getItemsSizeSumUpToIndex(items, index) {
+        let sum = 0;
+        for (let i = 0; i <= index; i++) {
+            let itemSize = this.getItemSize(items[i]);
+            sum += itemSize;
+        }
+
+        return sum;
+    }
+
     private calculateItems() {
         let el = this.parentScroll instanceof Window ? document.body : this.parentScroll || this.element.nativeElement;
 
         let d = this.calculateDimensions();
         let items = this.items || [];
         let offsetTop = this.getElementsOffset();
-        var itemsHeightSum = d.childHeight * d.itemCount;
-        if (this.getItemSize) {
-            itemsHeightSum = 0;
-            items.forEach(item => {
-                itemsHeightSum += this.getItemSize(item);
-            });
-        }
+        var itemsHeightSum = 0;
+
+        items.forEach(item => {
+            itemsHeightSum += this.getItemSize(item);
+        });
+
         this.scrollHeight = itemsHeightSum / d.itemsPerRow;
         if (el.scrollTop > this.scrollHeight) {
             el.scrollTop = this.scrollHeight + offsetTop;
         }
 
         let scrollTop = Math.max(0, el.scrollTop - offsetTop);
-        let indexByScrollTop = scrollTop / this.scrollHeight * d.itemCount / d.itemsPerRow;
+        let indexByScrollTop = 0;
+        let itemSizeSum = 0;
+        for (indexByScrollTop = 0; indexByScrollTop < d.itemCount && itemSizeSum < scrollTop; indexByScrollTop++) {
+            let itemSize = this.getItemSize(items[indexByScrollTop]);
+            itemSizeSum += itemSize;
+        }
+        indexByScrollTop = indexByScrollTop - 1;
+
         let end = Math.min(d.itemCount, Math.ceil(indexByScrollTop) * d.itemsPerRow + d.itemsPerRow * (d.itemsPerCol + 1));
 
         let maxStartEnd = end;
@@ -272,7 +302,7 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
         let maxStart = Math.max(0, maxStartEnd - d.itemsPerCol * d.itemsPerRow - d.itemsPerRow);
         let start = Math.min(maxStart, Math.floor(indexByScrollTop) * d.itemsPerRow);
 
-        this.topPadding = d.childHeight * Math.ceil(start / d.itemsPerRow) - (d.childHeight * Math.min(start, this.bufferAmount));;
+        this.topPadding = this.getItemsSizeSumUpToIndex(items, Math.ceil(start / d.itemsPerRow)) - (this.getItemsSizeSumUpToIndex(items, Math.min(start, this.bufferAmount)));
 
         start = !isNaN(start) ? start : -1;
         end = !isNaN(end) ? end : -1;

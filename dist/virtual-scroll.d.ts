@@ -40,6 +40,7 @@ export declare class VirtualScrollComponent implements OnInit, OnChanges, OnDest
     private countItemsPerRow();
     private getElementsOffset();
     private calculateDimensions();
+    private getItemsSizeSumUpToIndex(items, index);
     private calculateItems();
 }
 export declare class VirtualScrollModule {
