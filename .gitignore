@@ -5,3 +5,5 @@ node_modules/
 *.js
 /src/**/*.js
 angular2-virtual-scroll-*.tgz
+/.vs/VSWorkspaceState.json
+/.vs/config/applicationhost.config
