@@ -61,13 +61,6 @@ var VirtualScrollComponent = (function () {
         var _this = this;
         requestAnimationFrame(function () { return _this.calculateItems(); });
     };
-    VirtualScrollComponent.prototype.getHeightSumUpToIndex = function (index) {
-        var itemsHeightSum = 0;
-        for (var i = 0; i < index; i++) {
-            itemsHeightSum += this.getItemSize(this.items[i]);
-        }
-        return itemsHeightSum;
-    };
     VirtualScrollComponent.prototype.scrollInto = function (item) {
         var el = this.parentScroll instanceof Window ? document.body : this.parentScroll || this.element.nativeElement;
         var offsetTop = this.getElementsOffset();
@@ -75,8 +68,8 @@ var VirtualScrollComponent = (function () {
         if (index < 0 || index >= (this.items || []).length)
             return;
         var d = this.calculateDimensions();
-        var itemsHeightSum = this.getHeightSumUpToIndex(Math.floor(index / d.itemsPerRow));
-        var itemsHeightSumMin = this.getHeightSumUpToIndex(Math.min(index, this.bufferAmount));
+        var itemsHeightSum = this.getItemsSizeSumUpToIndex(this.items, Math.floor(index / d.itemsPerRow));
+        var itemsHeightSumMin = this.getItemsSizeSumUpToIndex(this.items, Math.min(index, this.bufferAmount));
         el.scrollTop = (itemsHeightSum - itemsHeightSumMin);
         this.refresh();
     };
