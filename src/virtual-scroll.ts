@@ -149,6 +149,15 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
         requestAnimationFrame(() => this.calculateItems());
     }
 
+    getHeightSumUpToIndex(index: number) {
+        let itemsHeightSum = 0;
+        for (var i = 0; i < index; i++) {
+            itemsHeightSum += this.getItemSize(this.items[i]);
+        }
+
+        return itemsHeightSum;
+    }
+
     scrollInto(item: any) {
         let el: Element = this.parentScroll instanceof Window ? document.body : this.parentScroll || this.element.nativeElement;
         let offsetTop = this.getElementsOffset();
@@ -156,8 +165,11 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
         if (index < 0 || index >= (this.items || []).length) return;
 
         let d = this.calculateDimensions();
-        el.scrollTop = (Math.floor(index / d.itemsPerRow) * d.childHeight)
-            - (d.childHeight * Math.min(index, this.bufferAmount));
+
+        let itemsHeightSum = this.getHeightSumUpToIndex(Math.floor(index / d.itemsPerRow));    
+        let itemsHeightSumMin = this.getHeightSumUpToIndex(Math.min(index, this.bufferAmount));
+
+        el.scrollTop = (itemsHeightSum - itemsHeightSumMin);
         this.refresh();
     }
 
