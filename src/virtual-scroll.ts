@@ -214,8 +214,8 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
         let el: Element = this.parentScroll instanceof Window ? document.body : this.parentScroll || this.element.nativeElement;
         let items = this.items || [];
         let itemCount = items.length;
-        let viewWidth = el.clientWidth - this.scrollbarWidth;
-        let viewHeight = el.clientHeight - this.scrollbarHeight;
+        let viewWidth = this.element.nativeElement.clientWidth;
+        let viewHeight = this.element.nativeElement.clientHeight;
 
         let contentDimensions;
         if (this.childWidth == undefined || this.childHeight == undefined) {
@@ -293,17 +293,28 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
             let itemSize = this.getItemSize(items[indexByScrollTop]);
             itemSizeSum += itemSize;
         }
+
         indexByScrollTop = indexByScrollTop - 1;
+        let start = indexByScrollTop;
 
-        let end = Math.min(d.itemCount, Math.ceil(indexByScrollTop) * d.itemsPerRow + d.itemsPerRow * (d.itemsPerCol + 1));
-
-        let maxStartEnd = end;
-        const modEnd = end % d.itemsPerRow;
-        if (modEnd) {
-            maxStartEnd = end + d.itemsPerRow - modEnd;
+        let viewHeight = this.element.nativeElement.clientHeight;
+        itemSizeSum = 0;
+        let i = start;
+        for (; i < d.itemCount && itemSizeSum < viewHeight; i++) {
+            let itemSize = this.getItemSize(items[i]);
+            itemSizeSum += itemSize;
         }
-        let maxStart = Math.max(0, maxStartEnd - d.itemsPerCol * d.itemsPerRow - d.itemsPerRow);
-        let start = Math.min(maxStart, Math.floor(indexByScrollTop) * d.itemsPerRow);
+        let end = i;
+
+        //let end = Math.min(d.itemCount, Math.ceil(indexByScrollTop) * d.itemsPerRow + d.itemsPerRow * (d.itemsPerCol + 1));
+
+        //let maxStartEnd = end;
+        //const modEnd = end % d.itemsPerRow;
+        //if (modEnd) {
+        //    maxStartEnd = end + d.itemsPerRow - modEnd;
+        //}
+        //let maxStart = Math.max(0, maxStartEnd - d.itemsPerCol * d.itemsPerRow - d.itemsPerRow);
+        //let start = Math.min(maxStart, Math.floor(indexByScrollTop) * d.itemsPerRow);
 
         this.topPadding = this.getItemsSizeSumUpToIndex(items, Math.ceil(start / d.itemsPerRow)) - (this.getItemsSizeSumUpToIndex(items, Math.min(start, this.bufferAmount)));
 
