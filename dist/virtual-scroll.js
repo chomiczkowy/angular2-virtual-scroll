@@ -156,7 +156,7 @@ var VirtualScrollComponent = (function () {
     };
     VirtualScrollComponent.prototype.getItemsSizeSumUpToIndex = function (items, index) {
         var sum = 0;
-        for (var i = 0; i <= index; i++) {
+        for (var i = 0; i < index; i++) {
             var itemSize = this.getItemSize(items[i]);
             sum += itemSize;
         }
@@ -183,7 +183,6 @@ var VirtualScrollComponent = (function () {
             var itemSize = this.getItemSize(items[indexByScrollTop]);
             itemSizeSum += itemSize;
         }
-        indexByScrollTop = indexByScrollTop - 1;
         var start = indexByScrollTop;
         var viewHeight = this.element.nativeElement.clientHeight;
         itemSizeSum = 0;
@@ -192,15 +191,8 @@ var VirtualScrollComponent = (function () {
             var itemSize = this.getItemSize(items[i]);
             itemSizeSum += itemSize;
         }
-        var end = i;
-        //let end = Math.min(d.itemCount, Math.ceil(indexByScrollTop) * d.itemsPerRow + d.itemsPerRow * (d.itemsPerCol + 1));
-        //let maxStartEnd = end;
-        //const modEnd = end % d.itemsPerRow;
-        //if (modEnd) {
-        //    maxStartEnd = end + d.itemsPerRow - modEnd;
-        //}
-        //let maxStart = Math.max(0, maxStartEnd - d.itemsPerCol * d.itemsPerRow - d.itemsPerRow);
-        //let start = Math.min(maxStart, Math.floor(indexByScrollTop) * d.itemsPerRow);
+        var end = i + 1;
+        start -= 1;
         this.topPadding = this.getItemsSizeSumUpToIndex(items, Math.ceil(start / d.itemsPerRow)) - (this.getItemsSizeSumUpToIndex(items, Math.min(start, this.bufferAmount)));
         start = !isNaN(start) ? start : -1;
         end = !isNaN(end) ? end : -1;

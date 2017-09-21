@@ -163,7 +163,7 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
 
         let d = this.calculateDimensions();
 
-        let itemsHeightSum = this.getItemsSizeSumUpToIndex(this.items, Math.floor(index / d.itemsPerRow));    
+        let itemsHeightSum = this.getItemsSizeSumUpToIndex(this.items, Math.floor(index / d.itemsPerRow));
         let itemsHeightSumMin = this.getItemsSizeSumUpToIndex(this.items, Math.min(index, this.bufferAmount));
 
         el.scrollTop = (itemsHeightSum - itemsHeightSumMin);
@@ -261,7 +261,7 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
 
     private getItemsSizeSumUpToIndex(items, index) {
         let sum = 0;
-        for (let i = 0; i <= index; i++) {
+        for (let i = 0; i < index; i++) {
             let itemSize = this.getItemSize(items[i]);
             sum += itemSize;
         }
@@ -294,7 +294,6 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
             itemSizeSum += itemSize;
         }
 
-        indexByScrollTop = indexByScrollTop - 1;
         let start = indexByScrollTop;
 
         let viewHeight = this.element.nativeElement.clientHeight;
@@ -304,18 +303,9 @@ export class VirtualScrollComponent implements OnInit, OnChanges, OnDestroy {
             let itemSize = this.getItemSize(items[i]);
             itemSizeSum += itemSize;
         }
-        let end = i;
+        let end = i + 1;    
 
-        //let end = Math.min(d.itemCount, Math.ceil(indexByScrollTop) * d.itemsPerRow + d.itemsPerRow * (d.itemsPerCol + 1));
-
-        //let maxStartEnd = end;
-        //const modEnd = end % d.itemsPerRow;
-        //if (modEnd) {
-        //    maxStartEnd = end + d.itemsPerRow - modEnd;
-        //}
-        //let maxStart = Math.max(0, maxStartEnd - d.itemsPerCol * d.itemsPerRow - d.itemsPerRow);
-        //let start = Math.min(maxStart, Math.floor(indexByScrollTop) * d.itemsPerRow);
-
+        start -= 1;
         this.topPadding = this.getItemsSizeSumUpToIndex(items, Math.ceil(start / d.itemsPerRow)) - (this.getItemsSizeSumUpToIndex(items, Math.min(start, this.bufferAmount)));
 
         start = !isNaN(start) ? start : -1;
